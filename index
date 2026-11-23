@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ONPRI POS · Powered by AstinTech</title>
+  <meta name="description" content="ONPRI POS, Powered by AstinTech — bilingual Kiswahili & English Point of Sale." />
+  <link rel="canonical" href="https://onpri.duckdns.org/" />
+  <style>
+    :root {
+      --bg: #f1f5f9;
+      --surface: #ffffff;
+      --surface-2: #f8fafc;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --ok: #059669;
+      --warn: #d97706;
+      --danger: #dc2626;
+    }
+    html.dark {
+      --bg: #020617;
+      --surface: #0f172a;
+      --surface-2: #1e293b;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --border: #1e293b;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+    }
+    .app-header {
+      position: sticky; top: 0; z-index: 30;
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 12px 20px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand-mark {
+      width: 38px; height: 38px; border-radius: 10px;
+      background: var(--accent); color: #fff;
+      display: grid; place-items: center; font-weight: 800; font-size: 16px;
+    }
+    .brand h1 { margin: 0; font-size: 16px; font-weight: 800; }
+    .brand p { margin: 0; font-size: 11px; color: var(--muted); }
+    .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .btn {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      padding: 7px 12px;
+      border-radius: 9px;
+      font-size: 12px; font-weight: 600;
+      cursor: pointer;
+    }
+    .btn:hover { background: var(--surface-2); }
+    .btn-primary {
+      background: var(--accent); color: #fff; border-color: var(--accent);
+    }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-ok { background: var(--ok); color: #fff; border-color: var(--ok); }
+    .btn-danger { background: var(--danger); color: #fff; border-color: var(--danger); }
+    .nav-tabs {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      padding: 12px 20px 0;
+      max-width: 1360px; margin: 0 auto;
+    }
+    .tab {
+      padding: 8px 14px; border-radius: 10px; border: 1px solid var(--border);
+      background: var(--surface); color: var(--muted); font-size: 13px; font-weight: 600; cursor: pointer;
+    }
+    .tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .container { max-width: 1360px; margin: 0 auto; padding: 16px 20px 40px; }
+    .pos-grid { display: grid; grid-template-columns: 1fr 380px; gap: 18px; align-items: start; }
+    @media (max-width: 960px) { .pos-grid { grid-template-columns: 1fr; } }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+    }
+    .controls-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+    input, select {
+      background: var(--surface-2); color: var(--text);
+      border: 1px solid var(--border); border-radius: 9px;
+      padding: 8px 11px; font-size: 13px;
+    }
+    .products-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(175px, 1fr)); gap: 10px;
+    }
+    .product-card {
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      border-radius: 12px;
+      padding: 12px;
+      text-align: left;
+      cursor: pointer;
+      display: flex; flex-direction: column; justify-content: space-between; gap: 6px;
+    }
+    .product-card:hover { border-color: var(--accent); }
+    .product-name { font-weight: 700; font-size: 13px; color: var(--text); }
+    .product-meta { font-size: 11px; color: var(--muted); }
+    .product-price { font-weight: 800; font-size: 14px; color: var(--accent); }
+    .cart-list { display: flex; flex-direction: column; gap: 8px; max-height: 290px; overflow-y: auto; margin: 10px 0; }
+    .cart-item {
+      display: flex; justify-content: space-between; align-items: center; gap: 8px;
+      padding: 8px 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface-2);
+    }
+    .qty-controls { display: flex; align-items: center; gap: 6px; }
+    .qty-btn {
+      width: 26px; height: 26px; border-radius: 7px; border: 1px solid var(--border);
+      background: var(--surface); color: var(--text); font-weight: 700; cursor: pointer;
+    }
+    .summary-row { display: flex; justify-content: space-between; font-size: 13px; margin: 5px 0; }
+    .summary-total { font-size: 17px; font-weight: 800; border-top: 1px dashed var(--border); padding-top: 8px; margin-top: 8px; }
+    .banner {
+      padding: 10px 14px; border-radius: 10px; font-size: 12px; margin-bottom: 12px;
+      border: 1px solid var(--border); background: var(--surface);
+    }
+    .banner.ok { border-color: #10b981; color: #047857; background: #ecfdf5; }
+    .banner.err { border-color: #ef4444; color: #b91c1c; background: #fef2f2; }
+    html.dark .banner.ok { background: #064e3b; color: #a7f3d0; }
+    html.dark .banner.err { background: #7f1d1d; color: #fecaca; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .stat-label { font-size: 12px; color: var(--muted); }
+    .stat-value { font-size: 22px; font-weight: 800; margin-top: 4px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--border); }
+    th { font-size: 11px; text-transform: uppercase; color: var(--muted); }
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(2, 6, 23, 0.65);
+      display: none; align-items: center; justify-content: center; padding: 16px; z-index: 60;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      width: 100%; max-width: 440px;
+      background: var(--surface); color: var(--text);
+      border: 1px solid var(--border); border-radius: 16px; padding: 18px;
+    }
+    .receipt-paper {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 12px;
+      background: #fff; color: #111; padding: 16px; border-radius: 8px; border: 1px solid #cbd5e1;
+    }
+    .hidden { display: none !important; }
+    @media print {
+      body * { visibility: hidden; }
+      #receiptPrintArea, #receiptPrintArea * { visibility: visible; }
+      #receiptPrintArea { position: fixed; left: 0; top: 0; width: 80mm; border: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-mark">OP</div>
+      <div>
+        <h1>ONPRI POS</h1>
+        <p id="subtitleText">Powered by AstinTech · onpri.duckdns.org · Helpline: +254707857245</p>
+      </div>
+    </div>
+    <div class="toolbar">
+      <button class="btn" id="btnCloudAuth">Connect Cloud DB</button>
+      <button class="btn" id="btnSyncCloud" disabled>Sync to Firestore</button>
+      <button class="btn" id="btnBeepToggle">Sound: ON</button>
+      <button class="btn" id="btnLangToggle">SW / EN</button>
+      <button class="btn" id="btnThemeToggle">Dark</button>
+    </div>
+  </header>
+
+  <nav class="nav-tabs">
+    <button class="tab active" data-tab="pos" id="tabPos">POS Counter</button>
+    <button class="tab" data-tab="inventory" id="tabInv">Inventory</button>
+    <button class="tab" data-tab="sales" id="tabSales">Sales &amp; Reports</button>
+    <button class="tab" data-tab="about" id="tabAbout">About POS</button>
+  </nav>
+
+  <main class="container">
+    <div id="statusBanner" class="banner hidden"></div>
+
+    <!-- POS COUNTER -->
+    <section id="view-pos" class="pos-grid">
+      <div class="card">
+        <div class="controls-row">
+          <input type="text" id="searchInput" placeholder="Search item name or SKU..." style="flex:1; min-width: 180px;" />
+          <select id="categoryFilter">
+            <option value="all">All Categories</option>
+            <option value="beverages">Beverages</option>
+            <option value="kitchen">Kitchen</option>
+            <option value="retail">Retail</option>
+            <option value="hospitality">Hospitality</option>
+          </select>
+          <button class="btn" id="btnOpenCamera">Scan Barcode</button>
+        </div>
+        <div id="productsGrid" class="products-grid"></div>
+      </div>
+
+      <aside class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h2 style="margin:0; font-size:15px;" id="cartTitle">Current Order</h2>
+          <button class="btn" id="btnClearCart">Clear</button>
+        </div>
+        <div id="cartList" class="cart-list"></div>
+        <div class="controls-row" style="margin-top:8px;">
+          <select id="paymentMethod" style="flex:1;">
+            <option value="Cash">Cash</option>
+            <option value="M-Pesa">M-Pesa</option>
+            <option value="Card">Card</option>
+          </select>
+          <input type="number" id="discountInput" min="0" value="0" placeholder="Discount" style="width:110px;" />
+        </div>
+        <div class="summary-row"><span id="lblSubtotal">Subtotal</span><strong id="valSubtotal">KES 0.00</strong></div>
+        <div class="summary-row"><span id="lblVat">VAT (16% incl.)</span><strong id="valVat">KES 0.00</strong></div>
+        <div class="summary-row"><span id="lblDiscount">Discount</span><strong id="valDiscount">KES 0.00</strong></div>
+        <div class="summary-row summary-total"><span id="lblTotal">Total</span><strong id="valTotal">KES 0.00</strong></div>
+        <button class="btn btn-primary" id="btnCheckout" style="width:100%; margin-top:12px; padding:11px; font-size:14px;">
+          Complete Sale &amp; Print Receipt
+        </button>
+      </aside>
+    </section>
+
+    <!-- INVENTORY -->
+    <section id="view-inventory" class="hidden">
+      <div class="card" style="margin-bottom:14px;">
+        <h2 style="margin:0 0 10px; font-size:15px;">Add / Restock Product</h2>
+        <form id="addItemForm" class="controls-row" style="margin-bottom:0;">
+          <input id="newSku" placeholder="SKU (e.g. COF-01)" required style="width:130px;" />
+          <input id="newName" placeholder="Product name" required style="flex:1; min-width:170px;" />
+          <select id="newCategory">
+            <option value="beverages">Beverages</option>
+            <option value="kitchen">Kitchen</option>
+            <option value="retail">Retail</option>
+            <option value="hospitality">Hospitality</option>
+          </select>
+          <input id="newPrice" type="number" min="0" step="0.01" placeholder="Price (KES)" required style="width:120px;" />
+          <input id="newStock" type="number" min="0" placeholder="Qty" required style="width:90px;" />
+          <button type="submit" class="btn btn-primary">Save Item</button>
+        </form>
+      </div>
+      <div class="card" style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr><th>SKU</th><th>Item</th><th>Category</th><th>Price</th><th>Stock</th><th>Action</th></tr>
+          </thead>
+          <tbody id="inventoryTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SALES & REPORTS -->
+    <section id="view-sales" class="hidden">
+      <div class="stats-grid">
+        <div class="card"><div class="stat-label">Total Revenue</div><div class="stat-value" id="statRevenue">KES 0.00</div></div>
+        <div class="card"><div class="stat-label">Completed Sales</div><div class="stat-value" id="statOrders">0</div></div>
+        <div class="card"><div class="stat-label">Inventory SKUs</div><div class="stat-value" id="statSkus">0</div></div>
+        <div class="card"><div class="stat-label">Low Stock Alerts (&le; 5)</div><div class="stat-value" id="statLowStock">0</div></div>
+      </div>
+      <div class="card" style="overflow-x:auto;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <h2 style="margin:0; font-size:15px;">Recent Receipts</h2>
+          <button class="btn" id="btnExportCsv">Export CSV</button>
+        </div>
+        <table>
+          <thead>
+            <tr><th>Receipt #</th><th>Time</th><th>Items</th><th>Method</th><th>Total</th><th>Receipt</th></tr>
+          </thead>
+          <tbody id="salesTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ABOUT POS -->
+    <section id="view-about" class="hidden">
+      <div class="card">
+        <h2 style="margin-top:0;">About ONPRI POS</h2>
+        <p style="font-size:13px; color:var(--muted);">
+          ONPRI POS, Powered by AstinTech — Bilingual English &amp; Kiswahili retail &amp; hospitality POS.
+        </p>
+        <p style="font-size:13px;"><strong>Domain:</strong> <a href="https://onpri.duckdns.org" target="_blank" rel="noreferrer">https://onpri.duckdns.org</a></p>
+        <p style="font-size:13px;"><strong>Support Helpline:</strong> <a href="tel:+254707857245">+254707857245</a></p>
+        <p style="font-size:13px;"><strong>Cloud Database:</strong> <code>valued-expanse-90z9n / ai-studio-onpripos-efed4a61-762a-4540-9c2e-8942d5520315</code></p>
+      </div>
+    </section>
+  </main>
+
+  <!-- RECEIPT MODAL -->
+  <div class="modal-backdrop" id="receiptModal">
+    <div class="modal">
+      <div id="receiptPrintArea" class="receipt-paper"></div>
+      <div style="display:flex; gap:8px; margin-top:12px; justify-content:flex-end;">
+        <button class="btn" id="btnCloseReceipt">Close</button>
+        <button class="btn btn-primary" onclick="window.print()">Print</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CAMERA BARCODE MODAL -->
+  <div class="modal-backdrop" id="cameraModal">
+    <div class="modal">
+      <h3 style="margin-top:0; font-size:15px;">Camera SKU / Barcode Scanner</h3>
+      <video id="cameraVideo" autoplay playsinline style="width:100%; border-radius:10px; background:#000;"></video>
+      <p id="cameraStatus" style="font-size:12px; color:var(--muted); margin:8px 0;">Point camera at product barcode...</p>
+      <div style="display:flex; justify-content:flex-end; gap:8px;">
+        <button class="btn" id="btnCloseCamera">Close Camera</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js';
+    import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js';
+    import { doc, getDoc, getDocFromServer, getFirestore, serverTimestamp, setDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
+
+    const firebaseConfig = {
+      projectId: 'valued-expanse-90z9n',
+      appId: '1:775243164588:web:690996bc6a4329beb66809',
+      apiKey: 'AIzaSyA1IZ3AUsv26I9PYC2fsLTy1E7lKxLtYew',
+      authDomain: 'valued-expanse-90z9n.firebaseapp.com',
+      firestoreDatabaseId: 'ai-studio-onpripos-efed4a61-762a-4540-9c2e-8942d5520315',
+      storageBucket: 'valued-expanse-90z9n.firebasestorage.app',
+      messagingSenderId: '775243164588'
+    };
+
+    const fbApp = initializeApp(firebaseConfig);
+    const db = getFirestore(fbApp, firebaseConfig.firestoreDatabaseId);
+    const auth = getAuth(fbApp);
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+
+    function handleFirestoreError(error, operationType, path) {
+      const info = {
+        error: error instanceof Error ? error.message : String(error),
+        operationType,
+        path,
+        authInfo: {
+          userId: auth.currentUser?.uid || null,
+          email: auth.currentUser?.email || null,
+          emailVerified: auth.currentUser?.emailVerified || null
+        }
+      };
+      console.error('Firestore Error:', JSON.stringify(info));
+      throw new Error(JSON.stringify(info));
+    }
+
+    (async function testConnection() {
+      try {
+        await getDocFromServer(doc(db, 'test', 'connection'));
+      } catch (err) {
+        if (err instanceof Error && err.message.includes('the client is offline')) {
+          console.error('Please check your Firebase configuration.');
+        }
+      }
+    })();
+
+    const STORAGE_INV = 'onpri_html_inventory_v1';
+    const STORAGE_SALES = 'onpri_html_sales_v1';
+
+    const defaultInventory = [
+      { id: '1', sku: 'BEV-001', name: 'Kenyan AA Coffee', nameSw: 'Kahawa ya Kenya AA', category: 'beverages', price: 320, stock: 45 },
+      { id: '2', sku: 'KIT-002', name: 'Nyama Choma Platter', nameSw: 'Sahani ya Nyama Choma', category: 'kitchen', price: 1450, stock: 18 },
+      { id: '3', sku: 'KIT-003', name: 'Chapati & Beef Stew', nameSw: 'Chapati na Mchuzi wa Nyama', category: 'kitchen', price: 550, stock: 24 },
+      { id: '4', sku: 'BEV-004', name: 'Fresh Mango Juice', nameSw: 'Juisi ya Embe Halisi', category: 'beverages', price: 280, stock: 30 },
+      { id: '5', sku: 'RET-005', name: 'Bottled Water 500ml', nameSw: 'Maji ya Chupa 500ml', category: 'retail', price: 100, stock: 80 },
+      { id: '6', sku: 'HOS-006', name: 'Garden Day Pass', nameSw: 'Tiketi ya Bustani', category: 'hospitality', price: 500, stock: 50 }
+    ];
+
+    let inventory = JSON.parse(localStorage.getItem(STORAGE_INV) || 'null') || defaultInventory;
+    let sales = JSON.parse(localStorage.getItem(STORAGE_SALES) || '[]');
+    let cart = [];
+    let lang = 'en';
+    let beepOn = true;
+    let audioCtx = null;
+    let camStream = null;
+    let camTimer = null;
+    let cloudUser = null;
+
+    const I18N = {
+      en: {
+        pos: 'POS Counter', inv: 'Inventory', sales: 'Sales & Reports', about: 'About POS',
+        cart: 'Current Order', clear: 'Clear', checkout: 'Complete Sale & Print Receipt',
+        subtotal: 'Subtotal', vat: 'VAT (16% incl.)', discount: 'Discount', total: 'Total'
+      },
+      sw: {
+        pos: 'Kaunta ya Mauzo', inv: 'Bohari', sales: 'Mauzo na Ripoti', about: 'Kuhusu POS',
+        cart: 'Oda ya Sasa', clear: 'Futa', checkout: 'Kamilisha Mauzo & Chapa Risiti',
+        subtotal: 'Jumla Ndogo', vat: 'VAT (16% ndani)', discount: 'Punguzo', total: 'Jumla Kuu'
+      }
+    };
+
+    function money(n) { return 'KES ' + Number(n || 0).toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+    function saveLocal() {
+      localStorage.setItem(STORAGE_INV, JSON.stringify(inventory));
+      localStorage.setItem(STORAGE_SALES, JSON.stringify(sales));
+    }
+
+    function beep(freq = 1200, dur = 0.07) {
+      if (!beepOn) return;
+      try {
+        audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + dur);
+      } catch {}
+    }
+
+    function showBanner(msg, type = 'ok') {
+      const el = document.getElementById('statusBanner');
+      el.textContent = msg;
+      el.className = 'banner ' + type;
+      setTimeout(() => el.classList.add('hidden'), 4500);
+    }
+
+    function renderProducts() {
+      const q = document.getElementById('searchInput').value.trim().toLowerCase();
+      const cat = document.getElementById('categoryFilter').value;
+      const grid = document.getElementById('productsGrid');
+      const list = inventory.filter(i =>
+        (cat === 'all' || i.category === cat) &&
+        (!q || i.name.toLowerCase().includes(q) || i.sku.toLowerCase().includes(q))
+      );
+      grid.innerHTML = list.map(item => `
+        <button class="product-card" data-id="${item.id}" ${item.stock <= 0 ? 'disabled style="opacity:.5"' : ''}>
+          <div>
+            <div class="product-name">${lang === 'sw' && item.nameSw ? item.nameSw : item.name}</div>
+            <div class="product-meta">${item.sku} · Stock: ${item.stock}</div>
+          </div>
+          <div class="product-price">${money(item.price)}</div>
+        </button>
+      `).join('');
+      grid.querySelectorAll('.product-card').forEach(btn => {
+        btn.addEventListener('click', () => addToCart(btn.dataset.id));
+      });
+    }
+
+    function addToCart(id) {
+      const item = inventory.find(i => i.id === id);
+      if (!item || item.stock <= 0) return;
+      const existing = cart.find(c => c.id === id);
+      if (existing) {
+        if (existing.qty >= item.stock) { beep(340, 0.12); return showBanner('Insufficient stock.', 'err'); }
+        existing.qty += 1;
+      } else {
+        cart.push({ id: item.id, name: item.name, price: item.price, qty: 1 });
+      }
+      beep(1250, 0.06);
+      renderCart();
+    }
+
+    function renderCart() {
+      const list = document.getElementById('cartList');
+      if (!cart.length) {
+        list.innerHTML = `<p style="font-size:12px; color:var(--muted); margin:14px 0;">No items added yet.</p>`;
+      } else {
+        list.innerHTML = cart.map(c => `
+          <div class="cart-item">
+            <div style="min-width:0;">
+              <div style="font-size:13px; font-weight:700;">${c.name}</div>
+              <div style="font-size:11px; color:var(--muted);">${money(c.price)} x ${c.qty}</div>
+            </div>
+            <div class="qty-controls">
+              <button class="qty-btn" data-act="dec" data-id="${c.id}">-</button>
+              <strong style="font-size:13px;">${c.qty}</strong>
+              <button class="qty-btn" data-act="inc" data-id="${c.id}">+</button>
+            </div>
+          </div>
+        `).join('');
+        list.querySelectorAll('.qty-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const idx = cart.findIndex(x => x.id === btn.dataset.id);
+            if (idx < 0) return;
+            if (btn.dataset.act === 'inc') {
+              const stockItem = inventory.find(i => i.id === btn.dataset.id);
+              if (stockItem && cart[idx].qty < stockItem.stock) cart[idx].qty += 1;
+            } else {
+              cart[idx].qty -= 1;
+              if (cart[idx].qty <= 0) cart.splice(idx, 1);
+            }
+            beep(980, 0.04);
+            renderCart();
+          });
+        });
+      }
+      const subtotal = cart.reduce((s, c) => s + c.price * c.qty, 0);
+      const discount = Math.min(subtotal, Math.max(0, Number(document.getElementById('discountInput').value || 0)));
+      const total = Math.max(0, subtotal - discount);
+      const vat = total - total / 1.16;
+      document.getElementById('valSubtotal').textContent = money(subtotal);
+      document.getElementById('valDiscount').textContent = money(discount);
+      document.getElementById('valVat').textContent = money(vat);
+      document.getElementById('valTotal').textContent = money(total);
+    }
+
+    function openReceipt(sale) {
+      const area = document.getElementById('receiptPrintArea');
+      area.innerHTML = `
+        <div style="text-align:center; border-bottom:1px dashed #94a3b8; padding-bottom:8px; margin-bottom:8px;">
+          <strong style="font-size:15px;">ONPRI POS</strong><br/>
+          <span>Powered by AstinTech</span><br/>
+          <span>onpri.duckdns.org · +254707857245</span><br/>
+          <span>Receipt: ${sale.receiptNo}</span><br/>
+          <span>${new Date(sale.createdAt).toLocaleString()}</span>
+        </div>
+        ${sale.items.map(i => `<div style="display:flex; justify-content:space-between;"><span>${i.qty}x ${i.name}</span><span>${money(i.price * i.qty)}</span></div>`).join('')}
+        <div style="border-top:1px dashed #94a3b8; margin-top:8px; padding-top:8px;">
+          <div style="display:flex; justify-content:space-between;"><span>Payment</span><strong>${sale.method}</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span>VAT (16%)</span><span>${money(sale.vat)}</span></div>
+          <div style="display:flex; justify-content:space-between; font-size:14px;"><strong>TOTAL</strong><strong>${money(sale.total)}</strong></div>
+        </div>
+        <div style="text-align:center; margin-top:10px;">Asante! Thank you for choosing ONPRI POS.</div>
+      `;
+      document.getElementById('receiptModal').classList.add('open');
+    }
+
+    function renderInventoryAndSales() {
+      document.getElementById('inventoryTableBody').innerHTML = inventory.map(i => `
+        <tr>
+          <td><code>${i.sku}</code></td>
+          <td><strong>${i.name}</strong></td>
+          <td>${i.category}</td>
+          <td>${money(i.price)}</td>
+          <td>${i.stock}</td>
+          <td><button class="btn" data-restock="${i.id}">+5 Stock</button></td>
+        </tr>
+      `).join('');
+      document.querySelectorAll('[data-restock]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const item = inventory.find(x => x.id === btn.dataset.restock);
+          if (item) { item.stock += 5; saveLocal(); renderProducts(); renderInventoryAndSales(); beep(1100, 0.05); }
+        });
+      });
+
+      const rev = sales.reduce((s, r) => s + r.total, 0);
+      document.getElementById('statRevenue').textContent = money(rev);
+      document.getElementById('statOrders').textContent = String(sales.length);
+      document.getElementById('statSkus').textContent = String(inventory.length);
+      document.getElementById('statLowStock').textContent = String(inventory.filter(i => i.stock <= 5).length);
+
+      document.getElementById('salesTableBody').innerHTML = sales.map(s => `
+        <tr>
+          <td><strong>${s.receiptNo}</strong></td>
+          <td>${new Date(s.createdAt).toLocaleString()}</td>
+          <td>${s.items.reduce((a, b) => a + b.qty, 0)}</td>
+          <td>${s.method}</td>
+          <td><strong>${money(s.total)}</strong></td>
+          <td><button class="btn" data-view-receipt="${s.id}">View</button></td>
+        </tr>
+      `).join('');
+      document.querySelectorAll('[data-view-receipt]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const found = sales.find(x => x.id === btn.dataset.viewReceipt);
+          if (found) openReceipt(found);
+        });
+      });
+    }
+
+    // Events
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        ['pos', 'inventory', 'sales', 'about'].forEach(v => {
+          document.getElementById('view-' + v).classList.toggle('hidden', v !== tab.dataset.tab);
+        });
+      });
+    });
+
+    document.getElementById('searchInput').addEventListener('input', renderProducts);
+    document.getElementById('categoryFilter').addEventListener('change', renderProducts);
+    document.getElementById('discountInput').addEventListener('input', renderCart);
+    document.getElementById('btnClearCart').addEventListener('click', () => { cart = []; renderCart(); });
+    document.getElementById('btnCloseReceipt').addEventListener('click', () => document.getElementById('receiptModal').classList.remove('open'));
+
+    document.getElementById('btnCheckout').addEventListener('click', () => {
+      if (!cart.length) { beep(340, 0.1); return showBanner('Add at least one item before checkout.', 'err'); }
+      const subtotal = cart.reduce((s, c) => s + c.price * c.qty, 0);
+      const discount = Math.min(subtotal, Math.max(0, Number(document.getElementById('discountInput').value || 0)));
+      const total = Math.max(0, subtotal - discount);
+      const sale = {
+        id: 'sale_' + Date.now(),
+        receiptNo: 'ONP-' + String(sales.length + 1001),
+        items: cart.map(c => ({ ...c })),
+        method: document.getElementById('paymentMethod').value,
+        discount,
+        vat: total - total / 1.16,
+        total,
+        createdAt: new Date().toISOString()
+      };
+      cart.forEach(c => {
+        const inv = inventory.find(i => i.id === c.id);
+        if (inv) inv.stock = Math.max(0, inv.stock - c.qty);
+      });
+      sales.unshift(sale);
+      cart = [];
+      document.getElementById('discountInput').value = '0';
+      saveLocal();
+      renderProducts(); renderCart(); renderInventoryAndSales();
+      beep(1560, 0.12);
+      openReceipt(sale);
+    });
+
+    document.getElementById('addItemForm').addEventListener('submit', e => {
+      e.preventDefault();
+      inventory.unshift({
+        id: 'sku_' + Date.now(),
+        sku: document.getElementById('newSku').value.trim().toUpperCase(),
+        name: document.getElementById('newName').value.trim(),
+        nameSw: '',
+        category: document.getElementById('newCategory').value,
+        price: Number(document.getElementById('newPrice').value || 0),
+        stock: Math.max(0, Math.floor(Number(document.getElementById('newStock').value || 0)))
+      });
+      e.target.reset();
+      saveLocal();
+      renderProducts(); renderInventoryAndSales();
+      beep(1320, 0.08);
+      showBanner('Product saved to inventory.');
+    });
+
+    document.getElementById('btnExportCsv').addEventListener('click', () => {
+      const rows = [['Receipt', 'Date', 'Payment', 'Total'], ...sales.map(s => [s.receiptNo, s.createdAt, s.method, s.total])];
+      const csv = rows.map(r => r.join(',')).join('\n');
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+      a.download = 'onpri-sales.csv';
+      a.click();
+    });
+
+    document.getElementById('btnBeepToggle').addEventListener('click', e => {
+      beepOn = !beepOn;
+      e.target.textContent = beepOn ? 'Sound: ON' : 'Sound: OFF';
+    });
+
+    document.getElementById('btnThemeToggle').addEventListener('click', e => {
+      const dark = document.documentElement.classList.toggle('dark');
+      e.target.textContent = dark ? 'Light' : 'Dark';
+    });
+
+    document.getElementById('btnLangToggle').addEventListener('click', () => {
+      lang = lang === 'en' ? 'sw' : 'en';
+      const t = I18N[lang];
+      document.getElementById('tabPos').textContent = t.pos;
+      document.getElementById('tabInv').textContent = t.inv;
+      document.getElementById('tabSales').textContent = t.sales;
+      document.getElementById('tabAbout').textContent = t.about;
+      document.getElementById('cartTitle').textContent = t.cart;
+      document.getElementById('btnClearCart').textContent = t.clear;
+      document.getElementById('btnCheckout').textContent = t.checkout;
+      document.getElementById('lblSubtotal').textContent = t.subtotal;
+      document.getElementById('lblVat').textContent = t.vat;
+      document.getElementById('lblDiscount').textContent = t.discount;
+      document.getElementById('lblTotal').textContent = t.total;
+      renderProducts();
+    });
+
+    // Camera SKU Scanner
+    async function stopCamera() {
+      if (camTimer) clearInterval(camTimer);
+      if (camStream) camStream.getTracks().forEach(t => t.stop());
+      camStream = null;
+      document.getElementById('cameraModal').classList.remove('open');
+    }
+    document.getElementById('btnCloseCamera').addEventListener('click', stopCamera);
+    document.getElementById('btnOpenCamera').addEventListener('click', async () => {
+      document.getElementById('cameraModal').classList.add('open');
+      try {
+        camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        const video = document.getElementById('cameraVideo');
+        video.srcObject = camStream;
+        if ('BarcodeDetector' in window) {
+          const detector = new window.BarcodeDetector();
+          camTimer = setInterval(async () => {
+            try {
+              const codes = await detector.detect(video);
+              if (codes.length) {
+                const raw = (codes[0].rawValue || '').trim().toLowerCase();
+                const match = inventory.find(i => i.sku.toLowerCase() === raw);
+                if (match) { addToCart(match.id); stopCamera(); showBanner('Scanned: ' + match.name); }
+              }
+            } catch {}
+          }, 500);
+        } else {
+          document.getElementById('cameraStatus').textContent = 'Camera active. BarcodeDetector not supported in this browser; search SKU manually.';
+        }
+      } catch {
+        document.getElementById('cameraStatus').textContent = 'Camera access denied or unavailable.';
+      }
+    });
+
+    // Firebase Cloud Auth & Firestore Sync
+    onAuthStateChanged(auth, user => {
+      cloudUser = user;
+      document.getElementById('btnCloudAuth').textContent = user ? 'Disconnect (' + (user.email || 'Cloud') + ')' : 'Connect Cloud DB';
+      document.getElementById('btnSyncCloud').disabled = !user;
+    });
+
+    document.getElementById('btnCloudAuth').addEventListener('click', async () => {
+      try {
+        if (cloudUser) { await signOut(auth); showBanner('Disconnected from Cloud Firestore.'); }
+        else { await signInWithPopup(auth, provider); beep(1350, 0.08); showBanner('Connected to Cloud Firestore.'); }
+      } catch (err) {
+        showBanner(err instanceof Error ? err.message : 'Google Sign-In failed.', 'err');
+      }
+    });
+
+    document.getElementById('btnSyncCloud').addEventListener('click', async () => {
+      if (!cloudUser) return;
+      const uid = cloudUser.uid.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 128);
+      const wsId = ('ws_html_' + uid.slice(0, 16)).replace(/[^a-zA-Z0-9_-]/g, '_');
+      const wsPath = `workspaces/${wsId}`;
+      try {
+        const wsRef = doc(db, 'workspaces', wsId);
+        const wsSnap = await getDoc(wsRef);
+        if (wsSnap.exists()) {
+          await updateDoc(wsRef, { name: 'ONPRI POS Web', currency: 'KES', domain: 'onpri.duckdns.org', updatedAt: serverTimestamp() });
+        } else {
+          await setDoc(wsRef, {
+            id: wsId, ownerId: uid, tenantId: 'onpri_web',
+            name: 'ONPRI POS Web', currency: 'KES', domain: 'onpri.duckdns.org',
+            createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+          });
+        }
+        const snapId = 'snap_' + Date.now();
+        await setDoc(doc(db, 'workspaces', wsId, 'snapshots', snapId), {
+          workspaceId: wsId, ownerId: uid, summaryLabel: 'ONPRI HTML POS Sync',
+          totalSalesCount: sales.length,
+          totalRevenue: Math.round(sales.reduce((s, r) => s + r.total, 0) * 100) / 100,
+          inventoryCount: inventory.length,
+          expensesCount: 0,
+          gateLogsCount: 0,
+          createdAt: serverTimestamp()
+        });
+        beep(1560, 0.1);
+        showBanner('Synced snapshot to Cloud Firestore!');
+      } catch (err) {
+        handleFirestoreError(err, 'write', wsPath);
+      }
+    });
+
+    renderProducts();
+    renderCart();
+    renderInventoryAndSales();
+  </script>
+</body>
+</html>
